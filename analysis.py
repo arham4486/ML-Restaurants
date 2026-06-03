@@ -1,6 +1,9 @@
+from tkinter import _test
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 df = pd.read_json('yelp_academic_dataset_business.json', lines=True)
 print(df.head())
 print(df.columns)
@@ -39,3 +42,10 @@ df_philly['review_velocity'] = (df_philly['review_count']) / (df_philly['review_
 print(df_philly['review_velocity'].head())
 df_philly['star_weight'] = (df_philly['stars']) * (df_philly['review_velocity'])
 print(df_philly['star_weight'].head())
+x = df_philly[['stars', 'review_count', 'review_velocity', 'star_weight']]
+y = df_philly['success']
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2 , random_state = 42)
+print(x_train.shape)
+print(x_test.shape)
+
+
