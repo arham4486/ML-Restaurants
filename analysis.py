@@ -54,11 +54,28 @@ df_philly['is_italian'] = df_philly['categories'].str.contains('italian', na = F
 x = df_philly[['latitude', 'longitude', 'is_pizza', 'is_italian', 'is_mexican', 'is_chinese']]
 y = df_philly['success']
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2 , random_state = 42)
-print(x_train.shape)
 print(x_test.shape)
 forest_model = RandomForestClassifier(random_state= 42, class_weight = 'balanced').fit(x_train, y_train)
 y_pred = forest_model.predict(x_test)
 print(y_pred)
 y_report = classification_report(y_test, y_pred)
 print(y_report)
-
+df_tampa = df_open[df_open['city'] == 'Tampa']
+print(df_tampa)
+df_tampa['success'] = (df_tampa['stars'] >= 3.5) & (df_tampa['review_count'] >= 25)
+df_tampa['star_weight'] = (df_tampa['stars']) * (df_tampa['review_count'])
+df_tampa['review_velocity'] = (df_tampa['review_count']) / (df_tampa['review_count'].max())
+tampa_cuisine = df_tampa['categories'].str.split(' , ').str[0].fillna('Other')
+df_tampa['cuisine'] = tampa_cuisine
+df_tampa['is_pizza'] = df_tampa['categories'].str.contains('pizza', na = False)
+df_tampa['is_chinese'] = df_tampa['categories'].str.contains('chinese', na = False)
+df_tampa['is_mexican'] = df_tampa['categories'].str.contains('mexican', na = False)
+df_tampa['is_italian'] = df_tampa['categories'].str.contains('italian', na = False)
+x_tampa = df_tampa[['latitude', 'longitude', 'is_pizza', 'is_italian', 'is_mexican', 'is_chinese']]
+y_tampa = df_tampa['success']
+y_tampapred = forest_model.predict(x_tampa)
+print(y_tampapred)
+ytampa_report = classification_report(y_tampa, y_tampapred, zero_division = 0)
+print(ytampa_report)
+tampa_successrate = ytampa_report.mean()
+philly_successrate = y_report.mean() 
