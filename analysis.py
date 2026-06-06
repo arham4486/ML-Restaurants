@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import GridSearchCV 
 df = pd.read_json('yelp_academic_dataset_business.json', lines=True)
 print(df.head())
 print(df.columns)
@@ -55,7 +56,7 @@ x = df_philly[['latitude', 'longitude', 'is_pizza', 'is_italian', 'is_mexican', 
 y = df_philly['success']
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2 , random_state = 42)
 print(x_test.shape)
-forest_model = RandomForestClassifier(random_state= 42, class_weight = 'balanced').fit(x_train, y_train)
+forest_model = RandomForestClassifier(random_state= 42, class_weight = 'balanced', n_estimators= 200, max_depth= 20).fit(x_train, y_train)
 y_pred = forest_model.predict(x_test)
 print(y_pred)
 y_report = classification_report(y_test, y_pred)
@@ -77,5 +78,15 @@ y_tampapred = forest_model.predict(x_tampa)
 print(y_tampapred)
 ytampa_report = classification_report(y_tampa, y_tampapred, zero_division = 0)
 print(ytampa_report)
-tampa_successrate = ytampa_report.mean()
-philly_successrate = y_report.mean() 
+df_tampacount = df_tampa['success'].value_counts()
+print(df_tampacount)
+features = forest_model.feature_importances_
+plt.bar( x_train.columns, features)
+#plt.show()
+gd = {'n_estimators' : [100, 200, 300], 'max_depth' : [5, 10, 20]}
+ggd = GridSearchCV(forest_model, gd)
+ggd.fit(x_train, y_train)
+print(ggd.best_params_)
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+
