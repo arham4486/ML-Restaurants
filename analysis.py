@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV 
+import joblib
 df = pd.read_json('yelp_academic_dataset_business.json', lines=True)
 print(df.head())
 print(df.columns)
@@ -37,7 +38,7 @@ def recommend_restaurants(min_stars):
     filtered = df_philly[df_philly['stars'] >= min_stars]
     return filtered.sort_values('review_count', ascending = False).head(5)
 print(recommend_restaurants(4.0))
-df_philly['success'] = (df_philly['stars']>= 3.5) & (df_philly['review_count'] >= 100)
+df_philly['success'] = (df_philly['stars']>= 3.5) & (df_philly['review_count'] >= 50)
 success_counts = (df_philly['success'].value_counts())
 print(success_counts)
 df_philly['review_velocity'] = (df_philly['review_count']) / (df_philly['review_count'].max())
@@ -63,7 +64,7 @@ y_report = classification_report(y_test, y_pred)
 print(y_report)
 df_tampa = df_open[df_open['city'] == 'Tampa']
 print(df_tampa)
-df_tampa['success'] = (df_tampa['stars'] >= 3.5) & (df_tampa['review_count'] >= 25)
+df_tampa['success'] = (df_tampa['stars'] >= 3.5) & (df_tampa['review_count'] >= 50)
 df_tampa['star_weight'] = (df_tampa['stars']) * (df_tampa['review_count'])
 df_tampa['review_velocity'] = (df_tampa['review_count']) / (df_tampa['review_count'].max())
 tampa_cuisine = df_tampa['categories'].str.split(' , ').str[0].fillna('Other')
@@ -89,4 +90,5 @@ ggd.fit(x_train, y_train)
 print(ggd.best_params_)
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
+joblib.dump(forest_model, 'model.pkl')
 
